@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<robot name="dual_arm_washer" xmlns:xacro="http://ros.org">
+
+  <xacro:arg name="use_sim" default="true"/>
+  <xacro:include filename="$(find dishbot_description)/urdf/arm_7dof.urdf.xacro"/>
+  <xacro:include filename="$(find dishbot_description)/urdf/end_effectors.urdf.xacro"/>
+  <xacro:include filename="$(find dishbot_description)/urdf/ros2_control.urdf.xacro"/>
+
+  <material name="dark_grey"><color rgba="0.2 0.2 0.2 1.0"/></material>
+  <link name="world"/>
+
+  <joint name="torso_fixed_joint" type="fixed">
+    <parent link="world"/><child link="torso_base_link"/><origin xyz="0 0 0"/>
+  </joint>
+  <link name="torso_base_link">
+    <visual><origin xyz="0 0 0.015"/><geometry><box size="0.18 0.72 0.03"/></geometry><material name="joint_dark"/></visual>
+    <visual><origin xyz="0 0 0.265"/><geometry><box size="0.12 0.64 0.47"/></geometry><material name="brushed_metal"/></visual>
+    <collision><origin xyz="0 0 0.25"/><geometry><box size="0.14 0.68 0.50"/></geometry></collision>
+    <inertial><mass value="18.0"/><inertia ixx="1.2" ixy="0" ixz="0" iyy="1.2" iyz="0" izz="1.0"/></inertial>
+  </link>
+
+  <joint name="camera_mount_joint" type="fixed">
+    <parent link="torso_base_link"/><child link="camera_link"/><origin xyz="0.09 0.0 0.56" rpy="0 0.7854 0"/>
+  </joint>
+  <link name="camera_link">
+    <visual><geometry><box size="0.035 0.13 0.035"/></geometry><material name="dark_grey"/></visual>
+  </link>
+
+  <xacro:arm_7dof prefix="left" parent="torso_base_link" reflect="1">
+    <origin xyz="0.06 0.275 0.42" rpy="0 0.5236 0"/>
+  </xacro:arm_7dof>
+  <xacro:ft_sensor_module prefix="left" parent="left_link_7"/>
+  <xacro:left_parallel_gripper parent="left_ft_sensor_link"/>
+
+  <xacro:arm_7dof prefix="right" parent="torso_base_link" reflect="-1">
+    <origin xyz="0.06 -0.275 0.42" rpy="0 0.5236 0"/>
+  </xacro:arm_7dof>
+  <xacro:ft_sensor_module prefix="right" parent="right_link_7"/>
+  <xacro:right_scrubber_brush parent="right_ft_sensor_link"/>
+
+  <xacro:dishbot_ros2_control use_sim="$(arg use_sim)"/>
+</robot>

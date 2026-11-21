@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org">
+
+  <xacro:macro name="arm_ros2_control_joints" params="prefix">
+    <xacro:macro name="joint_interface" params="j_num max_effort">
+      <joint name="${prefix}_joint_${j_num}">
+        <command_interface name="position"/>
+        <command_interface name="velocity"/>
+        <command_interface name="effort">
+          <param name="min">-${max_effort}</param>
+          <param name="max">${max_effort}</param>
+        </command_interface>
+        <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+      </joint>
+    </xacro:macro>
+    <xacro:joint_interface j_num="1" max_effort="80.0"/>
+    <xacro:joint_interface j_num="2" max_effort="80.0"/>
+    <xacro:joint_interface j_num="3" max_effort="40.0"/>
+    <xacro:joint_interface j_num="4" max_effort="40.0"/>
+    <xacro:joint_interface j_num="5" max_effort="15.0"/>
+    <xacro:joint_interface j_num="6" max_effort="15.0"/>
+    <xacro:joint_interface j_num="7" max_effort="15.0"/>
+  </xacro:macro>
+
+  <xacro:macro name="dishbot_ros2_control" params="use_sim:=true can_interface_left:=can0 can_interface_right:=can1">
+    <ros2_control name="DishbotDualArmSystem" type="system">
+      <hardware>
+        <xacro:if value="${use_sim}">
+          <plugin>topic_based_ros2_control/TopicBasedSystem</plugin>
+          <param name="joint_commands_topic">/isaac_joint_commands</param>
+          <param name="joint_states_topic">/isaac_joint_states</param>
+        </xacro:if>
+        <xacro:unless value="${use_sim}">
+          <plugin>dishbot_control/DishbotHardwareInterface</plugin>
+          <param name="can_left">${can_interface_left}</param>
+          <param name="can_right">${can_interface_right}</param>
+          <param name="control_freq_hz">1000</param>
+        </xacro:unless>
+      </hardware>
+      <xacro:arm_ros2_control_joints prefix="left"/>
+      <joint name="left_finger_joint_1">
+        <command_interface name="position"/><command_interface name="effort"/>
+        <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
+        <state_interface name="velocity"/><state_interface name="effort"/>
+      </joint>
+      <xacro:arm_ros2_control_joints prefix="right"/>
+      <joint name="right_brush_spin_joint">
+        <command_interface name="velocity"/>
+        <state_interface name="position"/><state_interface name="velocity"/>
+      </joint>
+    </ros2_control>
+  </xacro:macro>
+</robot>

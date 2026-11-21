@@ -1,0 +1,21 @@
+# ROS 2 Build Artifacts
+build/
+install/
+log/
+
+# Python & C++ Compiled Files
+__pycache__/
+*.py[cod]
+*.so
+*.o
+*.a
+
+# IDE & OS Files
+.vscode/
+.idea/
+.DS_Store
+*~
+
+# Isaac Sim / Omniverse Cache & Logs
+*.usd.bak
+.nvidia-omniverse/
